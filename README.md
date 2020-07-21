@@ -199,6 +199,20 @@ Samples from ISO country codes.
 ```json
 {"name":"co", "class":"country"}
 ```
+
+#### `city-country`
+Samples from worldcities.csv
+```json
+{"name": "geo","class": "city-country","fields": "city,country"}
+```
+
+#### `user-agent`
+user-agent Samples.
+```json
+{"name": "user-agent","class": "user-agent"}
+```
+
+
 #### `date`
 This distribution generates dates which are some time before an epoch date.  Dates shortly before the epoch are more common than those long before.  On average, the dates generated are 100 days before the epoch.  A format field is allowed which takes a format for the data in the style of Java's SimpleDateFormatter.  Note that the order of options is significant in that the format will apply to the start and end options if it comes before them.  By default, these are formatted like yyyy-MM-dd, but you can specify a different format using the format option.  Dates are selected by default to be before July 1, 2013.  The amount before is selected exponentially with mean of 100 days.  If you specify start or end dates, the dates will be sampled uniformly between your dates. The default start is January 1, 1970.  The default end is July 1, 2013.
 ```json
@@ -261,8 +275,9 @@ The following examples show how this sampler can be used
 #### `event`
 Samples Poisson distributed event times with specified rates.
 
+"forward" attribute for generate increasing time events if true, otherwise if false
 ```json
-{"name":"foo1", "class":"event", "rate": "0.1/d"}
+{"name":"foo1", "class":"event", "rate": "0.1/d", "forward": "true"}
 {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"}
 {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 ```

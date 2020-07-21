@@ -50,7 +50,9 @@ public class ArrivalSampler extends FieldSampler {
     private double meanInterval = 1000;  // interval - offset will have this mean
     private double minInterval = 0;      // no interval can be less than this
     private FancyTimeFormatter df = new FancyTimeFormatter("yyyy-MM-dd");
-
+    
+    // generate increasing time events
+    private boolean isForward;
     private double start = System.currentTimeMillis();
     private double now = start;
 
@@ -61,6 +63,11 @@ public class ArrivalSampler extends FieldSampler {
     @Override
     public void restart() {
         now = start;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public void setForward(boolean isForward) {
+        this.isForward = isForward;
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -94,7 +101,11 @@ public class ArrivalSampler extends FieldSampler {
         synchronized (this) {
             TextNode r = new TextNode(df.format(new Date((long) now)));
             double interval = -meanInterval * Math.log(1.0 - base.nextDouble());
-            now += (minInterval + interval);
+            if (isForward) {
+                this.now += (minInterval + interval);
+            }else{
+                this.now -= (minInterval + interval);
+            }
             return r;
         }
     }
