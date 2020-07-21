@@ -58,6 +58,7 @@ public class ArrivalSampler extends FieldSampler {
 
     public ArrivalSampler() {
         base = RandomUtils.getRandom();
+        isForward = true;
     }
 
     @Override
