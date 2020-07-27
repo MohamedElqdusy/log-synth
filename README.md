@@ -281,6 +281,10 @@ Samples Poisson distributed event times with specified rates.
 {"name":"foo2", "class":"event", "start": "2014-01-01", "format":"yyyy-MM-dd HH:mm:ss", "rate": "10/s"}
 {"name":"foo3", "class":"event", "format": "MM/dd/yyyy HH:mm:ss", "start": "02/01/2014 00:00:00", "rate": "0.5/s"}
 ```
+we only suport month ago as a "start" literal right now
+```json
+{"name":"_time","class":"event","format": "yyyy-MM-dd HH:mm:ss","rate": "100000/s","forward": "true","start":"month"}
+```
 #### `flatten`
 Turns an object into fields.
 

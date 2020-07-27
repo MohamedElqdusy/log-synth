@@ -27,6 +27,7 @@ import org.apache.mahout.common.RandomUtils;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Calendar; 
 import java.util.Random;
 
 /**
@@ -88,6 +89,13 @@ public class ArrivalSampler extends FieldSampler {
 
     @SuppressWarnings("UnusedDeclaration")
     public void setStart(String start) throws ParseException {
+        if (start.equals("month")) {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.MONTH, -1);
+            this.start = (double)cal.getTimeInMillis();
+            this.now = this.start;
+            return;
+        }
         this.start = df.parse(start).getTime();
         this.now = this.start;
     }
