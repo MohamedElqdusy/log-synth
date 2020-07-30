@@ -27,7 +27,7 @@ generates a million records using the schema in the file `schema.synth`.
 
 The allowable arguments include:
 
- `-count n`    Defines how many lines of data to emit.  Default value is 1000.  Suffixes including k, M, and G have customary meanings.
+ `-count n`    Defines how many lines of data to emit.  Default value is `java.lang.Long.MAX_VALUE`.  Suffixes including k, M, and G have customary meanings.
 
  `-schema file` Defines where to get the schema definition from.  The schema is in JSON format and consists of a list of field specifications.  Each field specification is a JSON object and is required to have the following value
 

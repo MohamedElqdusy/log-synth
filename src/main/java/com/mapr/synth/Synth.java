@@ -34,7 +34,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.OptionDef;
-import org.kohsuke.args4j.spi.IntOptionHandler;
+import org.kohsuke.args4j.spi.LongOptionHandler;
 import org.kohsuke.args4j.spi.Setter;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -128,11 +128,11 @@ public class Synth {
         }
 
         final List<ReportingWorker> tasks = Lists.newArrayList();
-        int limit = (opts.count + opts.threads) / opts.threads;
-        int remaining = opts.count;
+        Long limit = (opts.count + opts.threads) / opts.threads;
+        long remaining = opts.count;
         for (int i = 0; i < opts.threads; i++) {
 
-            final int count = Math.min(limit, remaining);
+            final Long count = Math.min(limit, remaining);
             remaining -= count;
 
             final SchemaSampler sampler = new SchemaSampler(opts.schema);
@@ -168,14 +168,14 @@ public class Synth {
         if (!"-".equals(opts.output)) {
             blinker.scheduleAtFixedRate(blink, 0, 5, TimeUnit.SECONDS);
         }
-        Set<Future<Integer>> results = tasks.stream()
+        Set<Future<Long>> results = tasks.stream()
                 .map(pool::submit)
                 .collect(Collectors.toCollection(HashSet::new));
 
         int total = 0;
         while (true) {
-            Set<Future<Integer>> done = new HashSet<>();
-            for (Future<Integer> result : results) {
+            Set<Future<Long>> done = new HashSet<>();
+            for (Future<Long> result : results) {
                 if (result.isDone()) {
                     try {
                         total += result.get();
@@ -204,14 +204,14 @@ public class Synth {
                 String.format("Expected to generate %d lines of output, but actually generated %d", opts.count, total));
     }
 
-    private static class ReportingWorker implements Callable<Integer> {
+    private static class ReportingWorker implements Callable<Long> {
         private final Options opts;
         private final SchemaSampler sampler;
         private final AtomicLong rowCount;
-        private final int count;
+        private final Long count;
         private final int fileNumber;
         private final String extension;
-        int localCount;
+        Long localCount;
         private ThreadMXBean mx;
         private AtomicLong wallTime;
         private AtomicLong threadTime;
@@ -226,7 +226,7 @@ public class Synth {
         private static XmlMapper xmlMapper;
         private static XMLStreamWriter sw;
 
-        ReportingWorker(final Options opts, final SchemaSampler sampler, final Template template, final AtomicLong rowCount, final int count, final int fileNumber) {
+        ReportingWorker(final Options opts, final SchemaSampler sampler, final Template template, final AtomicLong rowCount, final Long count, final int fileNumber) {
             mx = ManagementFactory.getThreadMXBean();
             try {
                 if (mx.isThreadCpuTimeSupported())
@@ -270,7 +270,7 @@ public class Synth {
         }
 
         @Override
-        public Integer call() throws Exception {
+        public Long call() throws Exception {
             if ("-".equals(opts.output)) {
                 return generateFile(opts, sampler, template, System.out, localCount);
             } else {
@@ -292,9 +292,9 @@ public class Synth {
                     }
 
                     header(opts.format, sampler.getFieldNames(), out);
-                    int rows = 0;
+                    Long rows = 0L;
                     while (rows < localCount) {
-                        int k = Math.min(localCount - rows, REPORTING_DELTA);
+                       Long k = Math.min(localCount - rows, REPORTING_DELTA);
                         rows += k;
                         rowCount.addAndGet(generateFile(opts, sampler, template, out, k));
                         wallTime.set(System.nanoTime());
@@ -323,15 +323,15 @@ public class Synth {
         }
 
 
-        static int generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, int count) throws IOException, TemplateException {
+        static Long generateFile(Options opts, SchemaSampler s, Template template, PrintStream out, Long count) throws IOException, TemplateException {
             if (template != null) {
                 PrintWriter writer = new PrintWriter(out);
 
-                for (int i = 0; i < count; i++) {
+                for (Long i = 0L; i < count; i++) {
                     template.process(s.sample(), writer);
                 }
             } else {
-                for (int i = 0; i < count; i++) {
+                for (Long i = 0L; i < count; i++) {
                     format(opts.format, opts.quote, s.getFieldNames(), s.sample(), out);
                 }
             }
@@ -476,7 +476,7 @@ public class Synth {
         int threads = 1;
 
         @Option(name = "-count", handler = SizeParser.class)
-        int count = 1000;
+        Long count = Long.MAX_VALUE;
 
         @Option(name = "-schema", required = true)
         File schema;
@@ -490,14 +490,14 @@ public class Synth {
         @Option(name = "-quote")
         Quote quote = Quote.DOUBLE_QUOTE;
 
-        public static class SizeParser extends IntOptionHandler {
-            public SizeParser(CmdLineParser parser, OptionDef option, Setter<? super Integer> setter) {
+        public static class SizeParser extends LongOptionHandler {
+            public SizeParser(CmdLineParser parser, OptionDef option, Setter<? super Long> setter) {
                 super(parser, option, setter);
             }
 
             @Override
-            protected Integer parse(String argument) throws NumberFormatException {
-                int n = Integer.parseInt(argument.replaceAll("[kKMG]?$", ""));
+            protected Long parse(String argument) throws NumberFormatException {
+                long n = Long.parseLong(argument.replaceAll("[kKMG]?$", ""));
 
                 switch (argument.charAt(argument.length() - 1)) {
                     case 'G':
